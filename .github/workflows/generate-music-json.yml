@@ -38,4 +38,4 @@ jobs:
         author_email: "actions@github.com"
         message: "Generate music.json"
         # Utilisation du GITHUB_TOKEN pour l'authentification
-        token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
