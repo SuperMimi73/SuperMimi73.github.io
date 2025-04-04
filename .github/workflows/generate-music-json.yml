@@ -6,6 +6,8 @@ on:
       - 'Music/**'
     branches:
       - 'main'
+  workflow_dispatch:  # Cela permet l'exécution manuelle via l'interface GitHub
+
 
 jobs:
   generate-json:
