@@ -1,15 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+  <meta charset="UTF-8">
+  <title>Music</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      cursor: pointer;
+    }
+    .sort-arrow {
+      margin-left: 5px;
+    }
+  </style>
 </head>
 <body>
-    <h2>
-	Hi this is the music page
-    </h2>
-	<h3>
-	<p>
-	there will be music here
-	</p>
-	</h3>
+
+<h2>Welcome to my music page ! I'll put here all the musics I know and like.</h2>
+
+<table id="musicTable">
+  <thead>
+    <tr>
+      <th onclick="toggleNameSort()">
+        Music name
+        <span id="nameSortArrow" class="sort-arrow">⬆</span>
+      </th>
+      <th onclick="toggleDurationSort()">
+        Listen to it
+        <span id="durationSortArrow" class="sort-arrow">⬍</span>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Accumula Town - Pokémon Black & Pokémon White</td>
+      <td><audio controls src="Accumula Town - Pokémon Black & Pokémon White.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td>Find the Chomiks OST 002 - Adornee</td>
+      <td><audio controls src="Find the Chomiks OST 002 - Adornee.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td>SoInhumane - Super Inhu Boy</td>
+      <td><audio controls src="SoInhumane - Super Inhu Boy.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td>Gusty Garden Galaxy - Super Mario Galaxy</td>
+      <td><audio controls src="Gusty Garden Galaxy - Super Mario Galaxy.mp3"></audio></td>
+    </tr>
+    <tr>
+      <td>OMFG - Hello</td>
+      <td><audio controls src="OMFG - Hello.mp3"></audio></td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+let ascendingName = true;
+let ascendingDuration = true;
+
+// Trie par nom
+function sortTableByName(asc = true) {
+  const table = document.getElementById("musicTable");
+  const tbody = table.tBodies[0];
+  const rows = Array.from(tbody.rows);
+
+  rows.sort((a, b) => {
+    const nameA = a.cells[0].innerText.toLowerCase();
+    const nameB = b.cells[0].innerText.toLowerCase();
+    return asc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  });
+
+  rows.forEach(row => tbody.appendChild(row));
+  document.getElementById("nameSortArrow").textContent = asc ? "⬆" : "⬇";
+}
+
+// Trie par durée
+function sortTableByDuration(asc = true) {
+  const table = document.getElementById("musicTable");
+  const tbody = table.tBodies[0];
+  const rows = Array.from(tbody.rows);
+
+  rows.sort((a, b) => {
+    const audioA = a.cells[1].querySelector("audio");
+    const audioB = b.cells[1].querySelector("audio");
+    const durationA = audioA.duration || 0;
+    const durationB = audioB.duration || 0;
+
+    return asc ? durationA - durationB : durationB - durationA;
+  });
+
+  rows.forEach(row => tbody.appendChild(row));
+  document.getElementById("durationSortArrow").textContent = asc ? "⬆" : "⬇";
+}
+
+// Bascule le tri par nom
+function toggleNameSort() {
+  ascendingName = !ascendingName;
+  sortTableByName(ascendingName);
+}
+
+// Bascule le tri par durée
+function toggleDurationSort() {
+  ascendingDuration = !ascendingDuration;
+  sortTableByDuration(ascendingDuration);
+}
+
+// Trie automatiquement par nom au chargement
+window.addEventListener("DOMContentLoaded", () => {
+  // On attend que tous les fichiers audio soient chargés
+  const audios = document.querySelectorAll("audio");
+  let loadedCount = 0;
+
+  audios.forEach(audio => {
+    // Si déjà prêt (en cache)
+    if (audio.readyState >= 1) {
+      loadedCount++;
+      if (loadedCount === audios.length) sortTableByName(true);
+    } else {
+      audio.addEventListener("loadedmetadata", () => {
+        loadedCount++;
+        if (loadedCount === audios.length) sortTableByName(true);
+      });
+    }
+  });
+});
+</script>
+
 </body>
 </html>
