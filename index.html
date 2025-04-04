@@ -19,10 +19,17 @@
     .sort-arrow {
       margin-left: 5px;
     }
-    #searchBar {
+    #searchContainer {
       margin: 10px 0;
+    }
+    #searchBar {
       padding: 5px;
       width: 300px;
+      font-size: 16px;
+    }
+    #musicCount {
+      margin-left: 15px;
+      font-weight: bold;
       font-size: 16px;
     }
   </style>
@@ -30,7 +37,11 @@
 <body>
 
 <h2>Welcome to my music page! Here are all the musics I know and like.</h2>
-<input type="text" id="searchBar" placeholder="Search for a music...">
+
+<div id="searchContainer">
+  <input type="text" id="searchBar" placeholder="Search for a music...">
+  <span id="musicCount">Loading...</span>
+</div>
 
 <table id="musicTable">
   <thead>
@@ -46,17 +57,17 @@
     </tr>
   </thead>
   <tbody>
-    <!-- Les musiques seront ajoutées ici automatiquement -->
+    <!-- Musiques générées dynamiquement -->
   </tbody>
 </table>
 
 <script>
 let isAscending = true;
 let isDurationAscending = true;
-let currentData = []; // Toutes les lignes de données, non filtrées
-let currentSort = 'name'; // ou 'duration'
+let currentData = [];
+let currentSort = 'name';
 
-// Récupérer les fichiers du dossier GitHub
+// Récupérer les fichiers MP3 depuis GitHub
 async function fetchMusicFiles() {
   const repoUrl = "https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music";
   const response = await fetch(repoUrl);
@@ -66,11 +77,10 @@ async function fetchMusicFiles() {
   currentData = mp3Files.map(file => ({
     name: file.name.replace(".mp3", ""),
     url: file.download_url,
-    duration: 0, // on la remplira après
+    duration: 0,
     element: null
   }));
 
-  // Charger les durées
   for (let item of currentData) {
     const audio = document.createElement("audio");
     audio.src = item.url;
@@ -85,33 +95,27 @@ async function fetchMusicFiles() {
   renderTable();
 }
 
-// Filtrage des données par la barre de recherche
 function filterData() {
   const searchTerm = document.getElementById("searchBar").value.toLowerCase();
   return currentData.filter(item => item.name.toLowerCase().includes(searchTerm));
 }
 
-// Tri des données
 function sortData(data) {
   if (currentSort === 'name') {
     return data.sort((a, b) =>
-      isAscending
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
+      isAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
     );
   } else if (currentSort === 'duration') {
     return data.sort((a, b) =>
-      isDurationAscending
-        ? a.duration - b.duration
-        : b.duration - a.duration
+      isDurationAscending ? a.duration - b.duration : b.duration - a.duration
     );
   }
   return data;
 }
 
-// Affichage du tableau
 function renderTable() {
   const tableBody = document.querySelector("#musicTable tbody");
+  const musicCount = document.getElementById("musicCount");
   tableBody.innerHTML = "";
 
   const filtered = filterData();
@@ -133,9 +137,11 @@ function renderTable() {
     row.appendChild(audioCell);
     tableBody.appendChild(row);
   }
+
+  // Mettre à jour le nombre visible
+  musicCount.textContent = `${filtered.length} music${filtered.length !== 1 ? "s" : ""} displayed`;
 }
 
-// Fonctions de tri
 function toggleSort() {
   if (currentSort === 'name') {
     isAscending = !isAscending;
@@ -158,10 +164,7 @@ function toggleSortByDuration() {
   document.getElementById("durationArrow").textContent = isDurationAscending ? "⬆" : "⬇";
 }
 
-// Écoute de la recherche
 document.getElementById("searchBar").addEventListener("input", renderTable);
-
-// Initialisation
 window.addEventListener("DOMContentLoaded", fetchMusicFiles);
 </script>
 
