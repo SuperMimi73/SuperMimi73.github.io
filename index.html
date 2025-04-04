@@ -5,11 +5,10 @@
   <title>My Music Player</title>
   <style>
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 8px; border: 1px solid #ddd; vertical-align: middle; }
+    th, td { padding: 8px; border: 1px solid #ddd; }
     input { padding: 5px; margin-bottom: 10px; width: 300px; }
     select { margin-left: 10px; padding: 5px; }
     audio { width: 100%; }
-    .duration { font-size: 0.9em; color: #666; display: block; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -45,12 +44,6 @@
       renderTable();
     }
 
-    function formatDuration(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
-
     function renderTable() {
       const tbody = document.querySelector("#musicTable tbody");
       tbody.innerHTML = "";
@@ -61,18 +54,11 @@
         nameCell.textContent = music.name;
 
         const playerCell = document.createElement("td");
-        
         const audio = document.createElement("audio");
         audio.controls = true;
-        audio.preload = "none";
+        audio.preload = "metadata"; // ← ici le changement
         audio.src = music.file;
-
-        const duration = document.createElement("span");
-        duration.className = "duration";
-        duration.textContent = formatDuration(music.duration);
-
         playerCell.appendChild(audio);
-        playerCell.appendChild(duration);
 
         row.appendChild(nameCell);
         row.appendChild(playerCell);
