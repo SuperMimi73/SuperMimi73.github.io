@@ -1,25 +1,35 @@
-name: Generate music.json
+name: Generate Music JSON
 
 on:
   push:
     paths:
-      - 'Music/*.mp3'
-      - '.github/workflows/generate-music-json.yml'
+      - 'Music/**'
+    branches:
+      - 'main'
 
 jobs:
   generate-json:
     runs-on: ubuntu-latest
-    
+
     steps:
-    # Étape 1 : Vérifier le dépôt
-    - name: Checkout code
+    - name: Check out the repository
       uses: actions/checkout@v2
 
-    # Étape 2 : Installer FFmpeg
-    - name: Install FFmpeg
-      run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-    # Étape 3 : Exécuter le script pour générer music.json
     - name: Generate music.json
       run: |
-        node generate-music-json.js
+        mkdir -p Music
+        echo "[" > music.json
+        for file in Music/*.mp3; do
+          name=$(basename "$file" .mp3)
+          duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$file")
+          echo "{\"name\":\"$name\", \"file\":\"$file\", \"duration\":$duration}," >> music.json
+        done
+        sed -i '$ s/,$//' music.json
+        echo "]" >> music.json
+
+    - name: Commit and push the music.json file
+      uses: EndBug/add-and-commit@v7
+      with:
+        author_name: "GitHub Actions"
+        author_email: "actions@github.com"
+        message: "Generate music.json"
