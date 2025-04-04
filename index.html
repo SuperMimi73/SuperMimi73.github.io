@@ -60,9 +60,10 @@ async function fetchMusicFiles() {
   const rows = mp3Files.map(file => {
     const row = document.createElement("tr");
 
-    // Créer une cellule pour le nom du fichier
+    // Créer une cellule pour le nom du fichier sans l'extension .mp3
     const nameCell = document.createElement("td");
-    nameCell.textContent = file.name;
+    const nameWithoutExtension = file.name.replace(".mp3", ""); // Enlever l'extension .mp3
+    nameCell.textContent = nameWithoutExtension;
     row.appendChild(nameCell);
 
     // Créer une cellule pour le lecteur audio
