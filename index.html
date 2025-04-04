@@ -19,11 +19,18 @@
     .sort-arrow {
       margin-left: 5px;
     }
+    #searchBar {
+      margin: 10px 0;
+      padding: 5px;
+      width: 300px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
 
 <h2>Welcome to my music page! Here are all the musics I know and like.</h2>
+<input type="text" id="searchBar" placeholder="Search for a music...">
 
 <table id="musicTable">
   <thead>
@@ -44,104 +51,117 @@
 </table>
 
 <script>
-// Fonction pour récupérer la liste des musiques du dossier Music sur GitHub
+let isAscending = true;
+let isDurationAscending = true;
+let currentData = []; // Toutes les lignes de données, non filtrées
+let currentSort = 'name'; // ou 'duration'
+
+// Récupérer les fichiers du dossier GitHub
 async function fetchMusicFiles() {
-  const repoUrl = "https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music";  // Remplace par ton dépôt
+  const repoUrl = "https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music";
   const response = await fetch(repoUrl);
   const data = await response.json();
-
-  // Filtrer les fichiers .mp3
   const mp3Files = data.filter(file => file.name.endsWith(".mp3"));
 
-  // Créer les lignes du tableau
-  const tableBody = document.querySelector("#musicTable tbody");
-  tableBody.innerHTML = ""; // Réinitialiser le tableau
+  currentData = mp3Files.map(file => ({
+    name: file.name.replace(".mp3", ""),
+    url: file.download_url,
+    duration: 0, // on la remplira après
+    element: null
+  }));
 
-  const rows = mp3Files.map(file => {
+  // Charger les durées
+  for (let item of currentData) {
+    const audio = document.createElement("audio");
+    audio.src = item.url;
+    await new Promise(resolve => {
+      audio.addEventListener("loadedmetadata", () => {
+        item.duration = audio.duration;
+        resolve();
+      });
+    });
+  }
+
+  renderTable();
+}
+
+// Filtrage des données par la barre de recherche
+function filterData() {
+  const searchTerm = document.getElementById("searchBar").value.toLowerCase();
+  return currentData.filter(item => item.name.toLowerCase().includes(searchTerm));
+}
+
+// Tri des données
+function sortData(data) {
+  if (currentSort === 'name') {
+    return data.sort((a, b) =>
+      isAscending
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name)
+    );
+  } else if (currentSort === 'duration') {
+    return data.sort((a, b) =>
+      isDurationAscending
+        ? a.duration - b.duration
+        : b.duration - a.duration
+    );
+  }
+  return data;
+}
+
+// Affichage du tableau
+function renderTable() {
+  const tableBody = document.querySelector("#musicTable tbody");
+  tableBody.innerHTML = "";
+
+  const filtered = filterData();
+  const sorted = sortData(filtered);
+
+  for (let item of sorted) {
     const row = document.createElement("tr");
 
-    // Créer une cellule pour le nom du fichier sans l'extension .mp3
     const nameCell = document.createElement("td");
-    const nameWithoutExtension = file.name.replace(".mp3", ""); // Enlever l'extension .mp3
-    nameCell.textContent = nameWithoutExtension;
-    row.appendChild(nameCell);
+    nameCell.textContent = item.name;
 
-    // Créer une cellule pour le lecteur audio
     const audioCell = document.createElement("td");
     const audio = document.createElement("audio");
     audio.controls = true;
-    audio.src = file.download_url; // Utiliser l'URL de téléchargement de GitHub
+    audio.src = item.url;
     audioCell.appendChild(audio);
 
-    // Ajouter la cellule au tableau
+    row.appendChild(nameCell);
     row.appendChild(audioCell);
-
-    // Ajouter la ligne au corps du tableau
-    return row;
-  });
-
-  // Ajouter toutes les lignes au tableau
-  rows.forEach(row => tableBody.appendChild(row));
-
-  // Après l'ajout des fichiers audio, récupérer la durée de chaque fichier
-  const audioElements = document.querySelectorAll("audio");
-  audioElements.forEach(audio => {
-    audio.addEventListener("loadedmetadata", () => {
-      // Récupérer la durée du fichier et la trier si nécessaire
-      const row = audio.closest("tr");
-      const duration = audio.duration;
-      row.dataset.duration = duration; // Stocker la durée dans l'élément tr pour le tri
-    });
-  });
+    tableBody.appendChild(row);
+  }
 }
 
-// Trier la table par nom de musique (ordre alphabétique)
-function sortTableByName(ascending = true) {
-  const table = document.getElementById("musicTable");
-  const tbody = table.tBodies[0];
-  const rows = Array.from(tbody.rows);
-
-  rows.sort((a, b) => {
-    const nameA = a.cells[0].textContent.toLowerCase();
-    const nameB = b.cells[0].textContent.toLowerCase();
-    return ascending ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
-  });
-
-  rows.forEach(row => tbody.appendChild(row));
-}
-
-// Trier par durée
-function sortTableByDuration(ascending = true) {
-  const table = document.getElementById("musicTable");
-  const tbody = table.tBodies[0];
-  const rows = Array.from(tbody.rows);
-
-  rows.sort((a, b) => {
-    const durationA = parseFloat(a.dataset.duration || 0);
-    const durationB = parseFloat(b.dataset.duration || 0);
-    return ascending ? durationA - durationB : durationB - durationA;
-  });
-
-  rows.forEach(row => tbody.appendChild(row));
-}
-
-// Fonction de bascule pour changer l'ordre alphabétique
-let isAscending = true;
+// Fonctions de tri
 function toggleSort() {
-  isAscending = !isAscending;
-  sortTableByName(isAscending);
+  if (currentSort === 'name') {
+    isAscending = !isAscending;
+  } else {
+    currentSort = 'name';
+    isAscending = true;
+  }
+  renderTable();
   document.getElementById("sortArrow").textContent = isAscending ? "⬆" : "⬇";
 }
 
-// Trier par durée avec bascule
-let isDurationAscending = true;
 function toggleSortByDuration() {
-  isDurationAscending = !isDurationAscending;
-  sortTableByDuration(isDurationAscending);
+  if (currentSort === 'duration') {
+    isDurationAscending = !isDurationAscending;
+  } else {
+    currentSort = 'duration';
+    isDurationAscending = true;
+  }
+  renderTable();
   document.getElementById("durationArrow").textContent = isDurationAscending ? "⬆" : "⬇";
 }
 
-// Appeler la fonction pour charger les fichiers à l'ouverture de la page
+// Écoute de la recherche
+document.getElementById("searchBar").addEventListener("input", renderTable);
+
+// Initialisation
 window.addEventListener("DOMContentLoaded", fetchMusicFiles);
 </script>
 
