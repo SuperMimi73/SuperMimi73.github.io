@@ -2,108 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Music List</title>
+  <title>My Music Player</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    input {
-      padding: 8px;
-      margin-bottom: 10px;
-      width: 100%;
-      max-width: 300px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    button {
-      padding: 5px 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
-    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ddd; }
+    input { padding: 5px; margin-bottom: 10px; width: 300px; }
+    select { margin-left: 10px; padding: 5px; }
+    audio { width: 100%; }
   </style>
 </head>
 <body>
-  <h1>Music List</h1>
-  <input type="text" id="searchBar" placeholder="Search for a song...">
-  <span id="musicCount">0 audio found</span>
+
+  <h1>My Music Library</h1>
+  <input type="text" id="search" placeholder="Search...">
+  <span id="count"></span>
+  <select id="sort">
+    <option value="alpha">A → Z</option>
+    <option value="alpha-rev">Z → A</option>
+    <option value="short">Shortest → Longest</option>
+    <option value="long">Longest → Shortest</option>
+  </select>
+
   <table id="musicTable">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Duration</th>
-        <th>Play</th>
+        <th>Title</th>
+        <th>Player</th>
       </tr>
     </thead>
-    <tbody>
-    </tbody>
+    <tbody></tbody>
   </table>
 
   <script>
-    // Fonction pour charger le fichier music.json
-    fetch('music.json')
-      .then(response => response.json())
-      .then(data => {
-        const musicTable = document.querySelector('#musicTable tbody');
-        const searchBar = document.getElementById('searchBar');
-        const musicCount = document.getElementById('musicCount');
-        
-        // Fonction pour mettre à jour le tableau
-        function updateTable(songs) {
-          musicTable.innerHTML = ''; // Vider le tableau
-          songs.forEach(song => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${song.name}</td>
-              <td>${formatDuration(song.duration)}</td>
-              <td><button onclick="playSong('${song.file}')">Play</button></td>
-            `;
-            musicTable.appendChild(row);
-          });
-          musicCount.textContent = `${songs.length} audio${songs.length > 1 ? 's' : ''} found`;
-        }
+    let musics = [], filtered = [];
 
-        // Fonction pour formater la durée
-        function formatDuration(seconds) {
-          const minutes = Math.floor(seconds / 60);
-          const remainingSeconds = seconds % 60;
-          return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-        }
+    async function fetchData() {
+      const res = await fetch('music.json');
+      musics = await res.json();
+      musics.sort((a, b) => a.name.localeCompare(b.name));
+      filtered = musics;
+      renderTable();
+    }
 
-        // Fonction pour jouer la musique
-        function playSong(file) {
-          const audio = new Audio(file);
-          audio.play();
-        }
+    function renderTable() {
+      const tbody = document.querySelector("#musicTable tbody");
+      tbody.innerHTML = "";
+      filtered.forEach(music => {
+        const row = document.createElement("tr");
 
-        // Trier et afficher les musiques
-        updateTable(data);
+        const nameCell = document.createElement("td");
+        nameCell.textContent = music.name;
 
-        // Ajouter un événement de recherche
-        searchBar.addEventListener('input', function() {
-          const searchTerm = searchBar.value.toLowerCase();
-          const filteredSongs = data.filter(song => song.name.toLowerCase().includes(searchTerm));
-          updateTable(filteredSongs);
-        });
-      })
-      .catch(error => console.error('Error loading music.json:', error));
+        const playerCell = document.createElement("td");
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.preload = "none";
+        audio.src = music.file;
+        playerCell.appendChild(audio);
+
+        row.appendChild(nameCell);
+        row.appendChild(playerCell);
+        tbody.appendChild(row);
+      });
+
+      const count = filtered.length;
+      document.getElementById("count").textContent = `${count} audio${count === 1 ? '' : 's'} found`;
+    }
+
+    document.getElementById("search").addEventListener("input", e => {
+      const val = e.target.value.toLowerCase();
+      filtered = musics.filter(m => m.name.toLowerCase().includes(val));
+      renderTable();
+    });
+
+    document.getElementById("sort").addEventListener("change", e => {
+      const val = e.target.value;
+      if (val === "alpha") {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (val === "alpha-rev") {
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (val === "short") {
+        filtered.sort((a, b) => a.duration - b.duration);
+      } else if (val === "long") {
+        filtered.sort((a, b) => b.duration - a.duration);
+      }
+      renderTable();
+    });
+
+    fetchData();
   </script>
+
 </body>
 </html>
+
