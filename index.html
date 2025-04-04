@@ -32,9 +32,8 @@
         Music name
         <span id="sortArrow" class="sort-arrow">⬆</span>
       </th>
-      <th>Listen to it</th>
       <th onclick="toggleSortByDuration()">
-        Duration
+        Listen to it
         <span id="durationArrow" class="sort-arrow">⬆</span>
       </th>
     </tr>
@@ -58,7 +57,7 @@ async function fetchMusicFiles() {
   const tableBody = document.querySelector("#musicTable tbody");
   tableBody.innerHTML = ""; // Réinitialiser le tableau
 
-  mp3Files.forEach(file => {
+  const rows = mp3Files.map(file => {
     const row = document.createElement("tr");
 
     // Créer une cellule pour le nom du fichier
@@ -77,14 +76,20 @@ async function fetchMusicFiles() {
     row.appendChild(audioCell);
 
     // Ajouter la ligne au corps du tableau
-    tableBody.appendChild(row);
+    return row;
+  });
 
-    // Attendre que le fichier audio soit prêt et récupérer la durée
+  // Ajouter toutes les lignes au tableau
+  rows.forEach(row => tableBody.appendChild(row));
+
+  // Après l'ajout des fichiers audio, récupérer la durée de chaque fichier
+  const audioElements = document.querySelectorAll("audio");
+  audioElements.forEach(audio => {
     audio.addEventListener("loadedmetadata", () => {
-      // Une fois les métadonnées chargées, ajouter la durée à la ligne
-      const durationCell = document.createElement("td");
-      durationCell.textContent = `${audio.duration.toFixed(2)} seconds`;
-      row.appendChild(durationCell);
+      // Récupérer la durée du fichier et la trier si nécessaire
+      const row = audio.closest("tr");
+      const duration = audio.duration;
+      row.dataset.duration = duration; // Stocker la durée dans l'élément tr pour le tri
     });
   });
 }
@@ -111,8 +116,8 @@ function sortTableByDuration(ascending = true) {
   const rows = Array.from(tbody.rows);
 
   rows.sort((a, b) => {
-    const durationA = parseFloat(a.cells[2]?.textContent || 0);
-    const durationB = parseFloat(b.cells[2]?.textContent || 0);
+    const durationA = parseFloat(a.dataset.duration || 0);
+    const durationB = parseFloat(b.dataset.duration || 0);
     return ascending ? durationA - durationB : durationB - durationA;
   });
 
