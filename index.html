@@ -57,17 +57,16 @@
     </tr>
   </thead>
   <tbody>
-    <!-- Musiques générées dynamiquement -->
+    <!-- rows will be injected here -->
   </tbody>
 </table>
 
 <script>
 let isAscending = true;
 let isDurationAscending = true;
-let currentData = [];
 let currentSort = 'name';
+let currentData = [];
 
-// Récupérer les fichiers MP3 depuis GitHub
 async function fetchMusicFiles() {
   const repoUrl = "https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music";
   const response = await fetch(repoUrl);
@@ -77,21 +76,23 @@ async function fetchMusicFiles() {
   currentData = mp3Files.map(file => ({
     name: file.name.replace(".mp3", ""),
     url: file.download_url,
-    duration: 0,
-    element: null
+    duration: 0
   }));
 
-  for (let item of currentData) {
-    const audio = document.createElement("audio");
-    audio.src = item.url;
-    await new Promise(resolve => {
+  // Charger toutes les durées
+  await Promise.all(currentData.map(item => {
+    return new Promise(resolve => {
+      const audio = new Audio();
+      audio.src = item.url;
       audio.addEventListener("loadedmetadata", () => {
         item.duration = audio.duration;
         resolve();
       });
+      audio.addEventListener("error", () => resolve()); // Si erreur, on continue quand même
     });
-  }
+  }));
 
+  // On affiche les musiques une fois tout chargé
   renderTable();
 }
 
@@ -121,7 +122,7 @@ function renderTable() {
   const filtered = filterData();
   const sorted = sortData(filtered);
 
-  for (let item of sorted) {
+  for (const item of sorted) {
     const row = document.createElement("tr");
 
     const nameCell = document.createElement("td");
@@ -138,7 +139,6 @@ function renderTable() {
     tableBody.appendChild(row);
   }
 
-  // Mettre à jour le nombre visible
   musicCount.textContent = `${filtered.length} music${filtered.length !== 1 ? "s" : ""} displayed`;
 }
 
