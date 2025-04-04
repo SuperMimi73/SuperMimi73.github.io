@@ -19,102 +19,120 @@
     .sort-arrow {
       margin-left: 5px;
     }
-    #search-container {
-      margin-top: 10px;
-      margin-bottom: 20px;
+    .search-bar {
+      margin: 20px 0;
     }
   </style>
 </head>
 <body>
 
 <h2>Welcome to my music page! Here are all the musics I know and like.</h2>
-
-<div id="search-container">
-  <input type="text" id="searchInput" placeholder="Search for a music...">
-  <span id="visibleCount"></span>
-</div>
+<input type="text" id="searchInput" class="search-bar" placeholder="Search for a music..." oninput="searchMusic()">
+<span id="visibleCount">0 musics</span>
 
 <table id="musicTable">
   <thead>
     <tr>
-      <th onclick="toggleNameSort()">Music name <span id="nameArrow" class="sort-arrow">⬆</span></th>
-      <th onclick="toggleDurationSort()">Listen to it <span id="durationArrow" class="sort-arrow">⬍</span></th>
+      <th onclick="toggleSort()">
+        Music name
+        <span id="sortArrow" class="sort-arrow">⬆</span>
+      </th>
+      <th onclick="toggleDurationSort()">
+        Listen to it
+        <span id="durationArrow" class="sort-arrow">⬆</span>
+      </th>
     </tr>
   </thead>
-  <tbody></tbody>
+  <tbody>
+    <!-- Music rows will be inserted here -->
+  </tbody>
 </table>
 
 <script>
-let musicData = [];
-let filteredData = [];
-let ascendingName = true;
-let ascendingDuration = true;
-let currentSort = "name"; // or "duration"
+// Variables de tri
+let ascending = true;
+let durationAscending = true;
 
-async function fetchMusicData() {
-  const response = await fetch("https://SuperMimi73.github.io/Music/musicData.json");
-  musicData = await response.json();
-  filteredData = [...musicData];
-  sortAndDisplay();
-}
+// Charger et afficher les musiques
+async function loadMusicData() {
+  const response = await fetch('https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music');
+  const data = await response.json();
 
-function sortAndDisplay() {
-  if (currentSort === "name") {
-    filteredData.sort((a, b) =>
-      ascendingName
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name)
-    );
-    document.getElementById("nameArrow").textContent = ascendingName ? "⬆" : "⬇";
-  } else {
-    filteredData.sort((a, b) =>
-      ascendingDuration
-        ? timeToSeconds(a.duration) - timeToSeconds(b.duration)
-        : timeToSeconds(b.duration) - timeToSeconds(a.duration)
-    );
-    document.getElementById("durationArrow").textContent = ascendingDuration ? "⬆" : "⬇";
+  const musicData = data
+    .filter(item => item.name.endsWith('.mp3')) // Filtre seulement les fichiers MP3
+    .map(item => ({
+      name: item.name.replace('.mp3', ''), // Enlever le .mp3 du nom
+      url: item.download_url,
+      duration: 0 // La durée sera définie plus tard
+    }));
+
+  for (let music of musicData) {
+    // Récupérer la durée de chaque fichier audio
+    let audio = new Audio(music.url);
+    audio.addEventListener('loadedmetadata', () => {
+      music.duration = audio.duration;
+      renderTable(musicData);
+    });
   }
-
-  const tbody = document.querySelector("#musicTable tbody");
-  tbody.innerHTML = "";
-  for (const music of filteredData) {
-    const tr = document.createElement("tr");
-    const nameTd = document.createElement("td");
-    nameTd.textContent = music.name;
-    const audioTd = document.createElement("td");
-    audioTd.innerHTML = `<audio controls src="${music.url}"></audio>`;
-    tr.appendChild(nameTd);
-    tr.appendChild(audioTd);
-    tbody.appendChild(tr);
-  }
-
-  document.getElementById("visibleCount").textContent = `${filteredData.length} musics shown`;
 }
 
-function timeToSeconds(time) {
-  const [minutes, seconds] = time.split(":").map(Number);
-  return minutes * 60 + seconds;
+// Rendre les musiques dans le tableau
+function renderTable(musicData) {
+  const tableBody = document.querySelector('#musicTable tbody');
+  tableBody.innerHTML = ''; // Réinitialise la table
+  musicData.forEach(music => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${music.name}</td>
+      <td><audio controls src="${music.url}"></audio></td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  updateVisibleCount(musicData);
 }
 
-function toggleNameSort() {
-  ascendingName = !ascendingName;
-  currentSort = "name";
-  sortAndDisplay();
+// Filtrer les musiques selon la barre de recherche
+function searchMusic() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const filteredData = musicData.filter(music =>
+    music.name.toLowerCase().includes(searchTerm)
+  );
+  renderTable(filteredData);
 }
 
+// Mettre à jour le nombre de musiques visibles
+function updateVisibleCount(musicData) {
+  const visibleCount = document.querySelectorAll('#musicTable tbody tr').length;
+  document.getElementById('visibleCount').textContent = `${visibleCount} musics`;
+}
+
+// Changer le tri des musiques (ordre alphabétique)
+function toggleSort() {
+  ascending = !ascending;
+  musicData.sort((a, b) => {
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
+    return ascending ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  });
+  renderTable(musicData);
+  document.getElementById('sortArrow').textContent = ascending ? "⬆" : "⬇";
+}
+
+// Changer le tri de la durée des musiques
 function toggleDurationSort() {
-  ascendingDuration = !ascendingDuration;
-  currentSort = "duration";
-  sortAndDisplay();
+  durationAscending = !durationAscending;
+  musicData.sort((a, b) => {
+    return durationAscending ? a.duration - b.duration : b.duration - a.duration;
+  });
+  renderTable(musicData);
+  document.getElementById('durationArrow').textContent = durationAscending ? "⬆" : "⬇";
 }
 
-document.getElementById("searchInput").addEventListener("input", function () {
-  const query = this.value.toLowerCase();
-  filteredData = musicData.filter(music => music.name.toLowerCase().includes(query));
-  sortAndDisplay();
+// Charger la page avec les données au démarrage
+window.addEventListener('DOMContentLoaded', () => {
+  loadMusicData();
 });
-
-window.addEventListener("DOMContentLoaded", fetchMusicData);
 </script>
 
 </body>
