@@ -4,9 +4,14 @@
   <meta charset="UTF-8">
   <title>Music</title>
   <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
     table {
       border-collapse: collapse;
       width: 100%;
+      margin-top: 10px;
     }
     th, td {
       border: 1px solid #ccc;
@@ -19,17 +24,13 @@
     .sort-arrow {
       margin-left: 5px;
     }
-    #searchContainer {
-      margin: 10px 0;
-    }
     #searchBar {
-      padding: 5px;
-      width: 300px;
+      padding: 8px;
       font-size: 16px;
+      width: 300px;
+      margin-right: 10px;
     }
-    #musicCount {
-      margin-left: 15px;
-      font-weight: bold;
+    #visibleCount {
       font-size: 16px;
     }
   </style>
@@ -37,135 +38,105 @@
 <body>
 
 <h2>Welcome to my music page! Here are all the musics I know and like.</h2>
-
-<div id="searchContainer">
-  <input type="text" id="searchBar" placeholder="Search for a music...">
-  <span id="musicCount">Loading...</span>
-</div>
+<input type="text" id="searchBar" placeholder="Search a music...">
+<span id="visibleCount">Loading...</span>
 
 <table id="musicTable">
   <thead>
     <tr>
-      <th onclick="toggleSort()">
-        Music name
-        <span id="sortArrow" class="sort-arrow">⬆</span>
+      <th onclick="toggleSortByName()">
+        Music name <span id="nameSortArrow" class="sort-arrow">⬆</span>
       </th>
       <th onclick="toggleSortByDuration()">
-        Listen to it
-        <span id="durationArrow" class="sort-arrow">⬆</span>
+        Listen to it <span id="durationSortArrow" class="sort-arrow">⬍</span>
       </th>
     </tr>
   </thead>
-  <tbody>
-    <!-- rows will be injected here -->
-  </tbody>
+  <tbody></tbody>
 </table>
 
 <script>
-let isAscending = true;
-let isDurationAscending = true;
-let currentSort = 'name';
-let currentData = [];
+  const GITHUB_API_URL = "https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music";
 
-async function fetchMusicFiles() {
-  const repoUrl = "https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music";
-  const response = await fetch(repoUrl);
-  const data = await response.json();
-  const mp3Files = data.filter(file => file.name.endsWith(".mp3"));
+  let ascendingName = true;
+  let ascendingDuration = true;
+  let musicData = [];
 
-  currentData = mp3Files.map(file => ({
-    name: file.name.replace(".mp3", ""),
-    url: file.download_url,
-    duration: 0
-  }));
+  async function fetchMusicFiles() {
+    const res = await fetch(GITHUB_API_URL);
+    const data = await res.json();
+    const mp3Files = data.filter(file => file.name.endsWith(".mp3"));
+    musicData = await Promise.all(mp3Files.map(async file => {
+      const audio = document.createElement("audio");
+      audio.src = file.download_url;
+      const duration = await getAudioDuration(audio.src);
+      return {
+        name: file.name.replace(/\.mp3$/, ""),
+        url: file.download_url,
+        duration: duration
+      };
+    }));
+    renderTable();
+  }
 
-  // Charger toutes les durées
-  await Promise.all(currentData.map(item => {
+  function getAudioDuration(src) {
     return new Promise(resolve => {
       const audio = new Audio();
-      audio.src = item.url;
-      audio.addEventListener("loadedmetadata", () => {
-        item.duration = audio.duration;
-        resolve();
-      });
-      audio.addEventListener("error", () => resolve()); // Si erreur, on continue quand même
+      audio.src = src;
+      audio.addEventListener("loadedmetadata", () => resolve(audio.duration || 0));
+      audio.addEventListener("error", () => resolve(0));
     });
-  }));
-
-  // On affiche les musiques une fois tout chargé
-  renderTable();
-}
-
-function filterData() {
-  const searchTerm = document.getElementById("searchBar").value.toLowerCase();
-  return currentData.filter(item => item.name.toLowerCase().includes(searchTerm));
-}
-
-function sortData(data) {
-  if (currentSort === 'name') {
-    return data.sort((a, b) =>
-      isAscending ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
-    );
-  } else if (currentSort === 'duration') {
-    return data.sort((a, b) =>
-      isDurationAscending ? a.duration - b.duration : b.duration - a.duration
-    );
-  }
-  return data;
-}
-
-function renderTable() {
-  const tableBody = document.querySelector("#musicTable tbody");
-  const musicCount = document.getElementById("musicCount");
-  tableBody.innerHTML = "";
-
-  const filtered = filterData();
-  const sorted = sortData(filtered);
-
-  for (const item of sorted) {
-    const row = document.createElement("tr");
-
-    const nameCell = document.createElement("td");
-    nameCell.textContent = item.name;
-
-    const audioCell = document.createElement("td");
-    const audio = document.createElement("audio");
-    audio.controls = true;
-    audio.src = item.url;
-    audioCell.appendChild(audio);
-
-    row.appendChild(nameCell);
-    row.appendChild(audioCell);
-    tableBody.appendChild(row);
   }
 
-  musicCount.textContent = `${filtered.length} music${filtered.length !== 1 ? "s" : ""} displayed`;
-}
+  function renderTable(filtered = "") {
+    const tbody = document.querySelector("#musicTable tbody");
+    tbody.innerHTML = "";
 
-function toggleSort() {
-  if (currentSort === 'name') {
-    isAscending = !isAscending;
-  } else {
-    currentSort = 'name';
-    isAscending = true;
+    const visibleMusic = musicData
+      .filter(m => m.name.toLowerCase().includes(filtered.toLowerCase()));
+
+    visibleMusic.forEach(music => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${music.name}</td>
+        <td><audio controls src="${music.url}"></audio></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    document.getElementById("visibleCount").textContent = `${visibleMusic.length} music${visibleMusic.length !== 1 ? 's' : ''}`;
   }
-  renderTable();
-  document.getElementById("sortArrow").textContent = isAscending ? "⬆" : "⬇";
-}
 
-function toggleSortByDuration() {
-  if (currentSort === 'duration') {
-    isDurationAscending = !isDurationAscending;
-  } else {
-    currentSort = 'duration';
-    isDurationAscending = true;
+  function toggleSortByName() {
+    ascendingName = !ascendingName;
+    musicData.sort((a, b) => {
+      return ascendingName
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name);
+    });
+    document.getElementById("nameSortArrow").textContent = ascendingName ? "⬆" : "⬇";
+    document.getElementById("durationSortArrow").textContent = "⬍";
+    renderTable(document.getElementById("searchBar").value);
   }
-  renderTable();
-  document.getElementById("durationArrow").textContent = isDurationAscending ? "⬆" : "⬇";
-}
 
-document.getElementById("searchBar").addEventListener("input", renderTable);
-window.addEventListener("DOMContentLoaded", fetchMusicFiles);
+  function toggleSortByDuration() {
+    ascendingDuration = !ascendingDuration;
+    musicData.sort((a, b) => {
+      return ascendingDuration ? a.duration - b.duration : b.duration - a.duration;
+    });
+    document.getElementById("durationSortArrow").textContent = ascendingDuration ? "⬆" : "⬇";
+    document.getElementById("nameSortArrow").textContent = "⬍";
+    renderTable(document.getElementById("searchBar").value);
+  }
+
+  document.getElementById("searchBar").addEventListener("input", () => {
+    renderTable(document.getElementById("searchBar").value);
+  });
+
+  window.addEventListener("DOMContentLoaded", async () => {
+    await fetchMusicFiles();
+    toggleSortByName(); // Tri alphabétique par défaut
+  });
 </script>
 
 </body>
