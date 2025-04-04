@@ -23,105 +23,120 @@
 </head>
 <body>
 
-<h2>Welcome to my music page! Listen to all the tracks I know and like.</h2>
+<h2>Welcome to my music page! Here are all the musics I know and like.</h2>
 
 <table id="musicTable">
   <thead>
     <tr>
-      <th onclick="toggleSortAlpha()">
+      <th onclick="toggleSort()">
         Music name
-        <span id="sortArrowAlpha" class="sort-arrow">⬆</span>
+        <span id="sortArrow" class="sort-arrow">⬆</span>
       </th>
       <th>Listen to it</th>
-      <th onclick="toggleSortDuration()">
+      <th onclick="toggleSortByDuration()">
         Duration
-        <span id="sortArrowDuration" class="sort-arrow">⬆</span>
+        <span id="durationArrow" class="sort-arrow">⬆</span>
       </th>
     </tr>
   </thead>
-  <tbody id="musicTableBody">
-    <!-- The music tracks will be inserted here by JavaScript -->
+  <tbody>
+    <!-- Les musiques seront ajoutées ici automatiquement -->
   </tbody>
 </table>
 
 <script>
-  let ascendingAlpha = true; // Default to alphabetical sorting ascending
-  let ascendingDuration = true; // Default to shortest to longest duration
+// Fonction pour récupérer la liste des musiques du dossier Music sur GitHub
+async function fetchMusicFiles() {
+  const repoUrl = "https://api.github.com/repos/SuperMimi73/SuperMimi73.github.io/contents/Music";  // Remplace par ton dépôt
+  const response = await fetch(repoUrl);
+  const data = await response.json();
 
-  const repoUrl = "https://api.github.com/repos/ton-utilisateur/ton-depot/contents/Music"; // Remplace par l'URL de ton dépôt GitHub
+  // Filtrer les fichiers .mp3
+  const mp3Files = data.filter(file => file.name.endsWith(".mp3"));
 
-  // Fonction pour récupérer la liste des fichiers MP3 du dossier "Music" sur GitHub
-  async function fetchMusicFiles() {
-    try {
-      const response = await fetch(repoUrl);
-      const data = await response.json();
+  // Créer les lignes du tableau
+  const tableBody = document.querySelector("#musicTable tbody");
+  tableBody.innerHTML = ""; // Réinitialiser le tableau
 
-      // Filtrer les fichiers MP3 dans le dossier Music
-      const mp3Files = data.filter(file => file.name.endsWith('.mp3')).map(file => ({
-        name: file.name,
-        url: file.download_url, // Lien direct pour télécharger le fichier
-      }));
+  mp3Files.forEach(file => {
+    const row = document.createElement("tr");
 
-      // Charger les durées des fichiers MP3
-      // Pour simplifier, on suppose des durées fictives ou on peut les récupérer via une API tierce si nécessaire
-      const musicFilesWithDuration = mp3Files.map(file => ({
-        ...file,
-        duration: 180 + Math.floor(Math.random() * 180), // Durée aléatoire pour l'exemple (en secondes)
-      }));
+    // Créer une cellule pour le nom du fichier
+    const nameCell = document.createElement("td");
+    nameCell.textContent = file.name;
+    row.appendChild(nameCell);
 
-      // Populer le tableau avec les fichiers récupérés
-      populateTable(musicFilesWithDuration);
-    } catch (error) {
-      console.error("Error fetching music files from GitHub:", error);
-    }
-  }
+    // Créer une cellule pour le lecteur audio
+    const audioCell = document.createElement("td");
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = file.download_url; // Utiliser l'URL de téléchargement de GitHub
+    audioCell.appendChild(audio);
 
-  // Fonction pour remplir le tableau avec les fichiers
-  function populateTable(files) {
-    const tbody = document.getElementById("musicTableBody");
-    tbody.innerHTML = ''; // Clear existing table content
+    // Ajouter la cellule au tableau
+    row.appendChild(audioCell);
 
-    files.forEach(file => {
-      const row = document.createElement('tr');
-      const nameCell = document.createElement('td');
-      nameCell.textContent = file.name;
-      const audioCell = document.createElement('td');
-      const audioElement = document.createElement('audio');
-      audioElement.controls = true;
-      audioElement.src = file.url;
-      audioCell.appendChild(audioElement);
-      const durationCell = document.createElement('td');
-      durationCell.textContent = `${file.duration} s`; // Durée en secondes
+    // Ajouter la ligne au corps du tableau
+    tableBody.appendChild(row);
 
-      row.appendChild(nameCell);
-      row.appendChild(audioCell);
+    // Attendre que le fichier audio soit prêt et récupérer la durée
+    audio.addEventListener("loadedmetadata", () => {
+      // Une fois les métadonnées chargées, ajouter la durée à la ligne
+      const durationCell = document.createElement("td");
+      durationCell.textContent = `${audio.duration.toFixed(2)} seconds`;
       row.appendChild(durationCell);
-      tbody.appendChild(row);
     });
-  }
+  });
+}
 
-  // Fonction de tri par ordre alphabétique
-  function toggleSortAlpha() {
-    ascendingAlpha = !ascendingAlpha;
-    const sortedFiles = [...musicFiles].sort((a, b) => {
-      const nameA = a.name.toLowerCase();
-      const nameB = b.name.toLowerCase();
-      return ascendingAlpha ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
-    });
-    document.getElementById("sortArrowAlpha").textContent = ascendingAlpha ? "⬆" : "⬇";
-    populateTable(sortedFiles);
-  }
+// Trier la table par nom de musique (ordre alphabétique)
+function sortTableByName(ascending = true) {
+  const table = document.getElementById("musicTable");
+  const tbody = table.tBodies[0];
+  const rows = Array.from(tbody.rows);
 
-  // Fonction de tri par durée
-  function toggleSortDuration() {
-    ascendingDuration = !ascendingDuration;
-    const sortedFiles = [...musicFiles].sort((a, b) => ascendingDuration ? a.duration - b.duration : b.duration - a.duration);
-    document.getElementById("sortArrowDuration").textContent = ascendingDuration ? "⬆" : "⬇";
-    populateTable(sortedFiles);
-  }
+  rows.sort((a, b) => {
+    const nameA = a.cells[0].textContent.toLowerCase();
+    const nameB = b.cells[0].textContent.toLowerCase();
+    return ascending ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  });
 
-  // Appeler la fonction pour charger les fichiers lors de l'ouverture de la page
-  fetchMusicFiles();
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+// Trier par durée
+function sortTableByDuration(ascending = true) {
+  const table = document.getElementById("musicTable");
+  const tbody = table.tBodies[0];
+  const rows = Array.from(tbody.rows);
+
+  rows.sort((a, b) => {
+    const durationA = parseFloat(a.cells[2]?.textContent || 0);
+    const durationB = parseFloat(b.cells[2]?.textContent || 0);
+    return ascending ? durationA - durationB : durationB - durationA;
+  });
+
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+// Fonction de bascule pour changer l'ordre alphabétique
+let isAscending = true;
+function toggleSort() {
+  isAscending = !isAscending;
+  sortTableByName(isAscending);
+  document.getElementById("sortArrow").textContent = isAscending ? "⬆" : "⬇";
+}
+
+// Trier par durée avec bascule
+let isDurationAscending = true;
+function toggleSortByDuration() {
+  isDurationAscending = !isDurationAscending;
+  sortTableByDuration(isDurationAscending);
+  document.getElementById("durationArrow").textContent = isDurationAscending ? "⬆" : "⬇";
+}
+
+// Appeler la fonction pour charger les fichiers à l'ouverture de la page
+window.addEventListener("DOMContentLoaded", fetchMusicFiles);
 </script>
 
 </body>
