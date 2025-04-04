@@ -1,0 +1,36 @@
+name: Generate music.json
+
+on:
+  push:
+    paths:
+      - 'Music/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Generate music.json
+        run: |
+          mkdir -p Music
+          echo "[" > music.json
+          first=true
+          for f in Music/*.mp3; do
+            [ -f "$f" ] || continue
+            duration=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f")
+            name=$(basename "$f" .mp3)
+            [ "$first" = true ] || echo "," >> music.json
+            echo "  {\"name\": \"${name//\"/\\\"}\", \"file\": \"$f\", \"duration\": ${duration:-0}}" >> music.json
+            first=false
+          done
+          echo "]" >> music.json
+
+      - name: Commit music.json
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add music.json
+          git diff --cached --quiet || git commit -m "Update music.json"
+          git push
