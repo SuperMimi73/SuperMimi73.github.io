@@ -6,8 +6,7 @@ on:
       - 'Music/**'
     branches:
       - 'main'
-  workflow_dispatch:  # Cela permet l'exécution manuelle via l'interface GitHub
-
+  workflow_dispatch:  # Permet l'exécution manuelle
 
 jobs:
   generate-json:
@@ -38,3 +37,5 @@ jobs:
         author_name: "GitHub Actions"
         author_email: "actions@github.com"
         message: "Generate music.json"
+        # Utilisation du GITHUB_TOKEN pour l'authentification
+        token: ${{ secrets.GITHUB_TOKEN }}
