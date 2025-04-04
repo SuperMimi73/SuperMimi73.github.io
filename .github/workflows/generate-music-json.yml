@@ -18,11 +18,6 @@ jobs:
     - name: Install FFmpeg
       run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-    - name: Verify FFmpeg installation
-      run: |
-        ffmpeg -version
-        ffprobe -version
-
     - name: Generate music.json
       run: |
         mkdir -p Music
