@@ -82,9 +82,13 @@
 {"name":"Nuclear Throne - Groundwork of the Past", "file":"Music/Nuclear Throne - Groundwork of the Past.mp3", "duration":137.195102},
 {"name":"Nuclear Throne - Kings and Queens of Wasteland", "file":"Music/Nuclear Throne - Kings and Queens of Wasteland.mp3", "duration":270.210612},
 {"name":"Nuclear Throne - Legend of the Throne", "file":"Music/Nuclear Throne - Legend of the Throne.mp3", "duration":127.686531},
+{"name":"Nuclear Throne - Machine God", "file":"Music/Nuclear Throne - Machine God.mp3", "duration":97.175510},
+{"name":"Nuclear Throne - Mind Killer", "file":"Music/Nuclear Throne - Mind Killer.mp3", "duration":109.792653},
 {"name":"Nuclear Throne - Mt. Rubble", "file":"Music/Nuclear Throne - Mt. Rubble.mp3", "duration":95.190204},
+{"name":"Nuclear Throne - Ode", "file":"Music/Nuclear Throne - Ode.mp3", "duration":129.175510},
 {"name":"Nuclear Throne - Secret Entrance", "file":"Music/Nuclear Throne - Secret Entrance.mp3", "duration":111.177125},
 {"name":"Nuclear Throne - This Is It", "file":"Music/Nuclear Throne - This Is It.mp3", "duration":81.711020},
+{"name":"Nuclear Throne - Where the Guns at (feat. Joonas Turner)", "file":"Music/Nuclear Throne - Where the Guns at (feat. Joonas Turner).mp3", "duration":140.094694},
 {"name":"OMFG - Hello", "file":"Music/OMFG - Hello.mp3", "duration":226.351020},
 {"name":"Persona 4 Reincarnation - Specialist", "file":"Music/Persona 4 Reincarnation - Specialist.mp3", "duration":243.147750},
 {"name":"Pilotredsun - Fat Cat", "file":"Music/Pilotredsun - Fat Cat.mp3", "duration":264.097959},
@@ -120,5 +124,6 @@
 {"name":"Undertale OST 098 - Battle Against a True Hero", "file":"Music/Undertale OST 098 - Battle Against a True Hero.mp3", "duration":156.969796},
 {"name":"Undertale OST 100 - Megalovania", "file":"Music/Undertale OST 100 - Megalovania.mp3", "duration":156.160000},
 {"name":"Waterflame - Rupture", "file":"Music/Waterflame - Rupture.mp3", "duration":316.212245},
-{"name":"Wii Shop Channel - Main Theme", "file":"Music/Wii Shop Channel - Main Theme.mp3", "duration":128.417959}
+{"name":"Wii Shop Channel - Main Theme", "file":"Music/Wii Shop Channel - Main Theme.mp3", "duration":128.417959},
+{"name":"jinsang - with.you", "file":"Music/jinsang - with.you.mp3", "duration":221.928000}
 ]
