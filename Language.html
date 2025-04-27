@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multilingual Table</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #searchContainer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #searchBar {
+      padding: 10px;
+      font-size: 16px;
+      flex: 0 0 300px;
+    }
+    #resultCount {
+      font-size: 16px;
+      white-space: nowrap;
+    }
+    #duplicateCount {
+      font-size: 16px;
+      color: red;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+    th button {
+      margin-top: 5px;
+      padding: 5px 10px;
+      font-size: 14px;
+      width: 140px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    mark {
+      background-color: yellow;
+      color: black;
+    }
+    .duplicate {
+      background-color: orange !important;
+    }
+  </style>
+</head>
+<body>
+
+<div id="searchContainer">
+  <input type="text" id="searchBar" placeholder="Search..." oninput="filterTable()">
+  <div id="resultCount">0 results</div>
+  <div id="duplicateCount"></div>
+</div>
+
+<table id="langTable">
+  <thead>
+    <tr>
+      <th>English<br><button id="btn-0" onclick="sortTable(0)">None</button></th>
+      <th>French<br><button id="btn-1" onclick="sortTable(1)">None</button></th>
+      <th>Spanish<br><button id="btn-2" onclick="sortTable(2)">None</button></th>
+      <th>Japanese<br><button id="btn-3" onclick="sortTable(3)">None</button></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Le contenu sera généré par JavaScript -->
+  </tbody>
+</table>
+
+<script>
+// Liste de tous les mots
+const words = [
+  { en: "red", fr: "rouge", es: "rojo", jp: "赤", romaji: "aka" },
+  { en: "yellow", fr: "jaune", es: "amarillo", jp: "黄色", romaji: "kiiro" },
+  { en: "green", fr: "vert", es: "verde", jp: "緑", romaji: "midori" },
+  { en: "blue", fr: "bleu", es: "azul", jp: "青", romaji: "ao" },
+  { en: "orange", fr: "orange", es: "naranja", jp: "橙色", romaji: "daidaiiro" },
+  { en: "black", fr: "noir", es: "negro", jp: "黒", romaji: "kuro" },
+  { en: "pink", fr: "rose", es: "rosa", jp: "桃色", romaji: "momoiro" },
+  { en: "purple", fr: "violet", es: "morado", jp: "紫", romaji: "murasaki" },
+  { en: "gray", fr: "gris", es: "gris", jp: "灰色", romaji: "haiiro" },
+  { en: "white", fr: "blanc", es: "blanco", jp: "白", romaji: "shiro" },
+  { en: "dog", fr: "chien", es: "perro", jp: "犬", romaji: "inu" },
+  { en: "cat", fr: "chat", es: "gato", jp: "猫", romaji: "neko" },
+  { en: "shark", fr: "requin", es: "tiburón", jp: "鮫", romaji: "same" },
+  { en: "parrot", fr: "perroquet", es: "loro", jp: "鸚鵡", romaji: "oumu" },
+  { en: "diamond", fr: "diamant", es: "diamante", jp: "ダイヤモンド", romaji: "daiyamondo" },
+  { en: "emerald", fr: "émeraude", es: "esmeralda", jp: "エメラルド", romaji: "emerarudo" },
+  { en: "fire", fr: "feu", es: "fuego", jp: "火", romaji: "hi" },
+  { en: "water", fr: "eau", es: "agua", jp: "水", romaji: "mizu" },
+  { en: "paper", fr: "papier", es: "papel", jp: "紙", romaji: "kami" },
+  { en: "tree", fr: "arbre", es: "árbol", jp: "木", romaji: "ki" },
+  { en: "skeleton", fr: "squelette", es: "esqueleto", jp: "骨", romaji: "hone" },
+  { en: "wolf", fr: "loup", es: "lobo", jp: "狼", romaji: "ōkami" },
+  { en: "wind", fr: "vent", es: "viento", jp: "風", romaji: "kaze" },
+  { en: "earth", fr: "terre", es: "tierra", jp: "土", romaji: "tsuchi" },
+  { en: "time", fr: "temps", es: "tiempo", jp: "時間", romaji: "jikan" },
+  { en: "giraffe", fr: "girafe", es: "jirafa", jp: "キリン", romaji: "kirin" },
+  { en: "lion", fr: "lion", es: "león", jp: "ライオン", romaji: "raion" },
+  { en: "elevator", fr: "ascenseur", es: "ascensor", jp: "エレベーター", romaji: "erebētā" },
+  { en: "fragment", fr: "fragment", es: "fragmento", jp: "かけら", romaji: "kakera" },
+  { en: "lava", fr: "lave", es: "lava", jp: "溶岩", romaji: "yōgan" },
+  { en: "temporal", fr: "temporel", es: "temporal", jp: "時間の", romaji: "jikan no" },
+  { en: "journey", fr: "voyage", es: "viaje", jp: "旅", romaji: "tabi" },
+  { en: "infinite", fr: "infini", es: "infinito", jp: "無限", romaji: "mugen" },
+  { en: "four", fr: "quatre", es: "cuatro", jp: "四", romaji: "yon" },
+  { en: "city", fr: "ville", es: "ciudad", jp: "街", romaji: "machi" },
+  { en: "awesome", fr: "génial", es: "increíble", jp: "素晴らしい", romaji: "subarashii" },
+  { en: "apple", fr: "pomme", es: "manzana", jp: "リンゴ", romaji: "ringo" },
+  { en: "banana", fr: "banane", es: "plátano", jp: "バナナ", romaji: "banana" },
+  { en: "grape", fr: "raisin", es: "uva", jp: "ぶどう", romaji: "budō" },
+  { en: "cherry", fr: "cerise", es: "cereza", jp: "さくらんぼ", romaji: "sakuranbo" },
+  { en: "orange", fr: "orange", es: "naranja", jp: "オレンジ", romaji: "orenji" },
+  { en: "pineapple", fr: "ananas", es: "piña", jp: "パイナップル", romaji: "painappuru" },
+  { en: "peach", fr: "pêche", es: "durazno", jp: "桃", romaji: "momo" },
+  { en: "strawberry", fr: "fraise", es: "fresa", jp: "苺", romaji: "ichigo" },
+  { en: "lemon", fr: "citron", es: "limón", jp: "レモン", romaji: "remon" },
+  { en: "melon", fr: "melon", es: "melón", jp: "メロン", romaji: "meron" },
+  { en: "carrot", fr: "carotte", es: "zanahoria", jp: "人参", romaji: "ninjin" },
+  { en: "tomato", fr: "tomate", es: "tomate", jp: "トマト", romaji: "tomato" },
+  { en: "potato", fr: "pomme de terre", es: "papa", jp: "じゃがいも", romaji: "jagaimo" },
+  { en: "onion", fr: "oignon", es: "cebolla", jp: "玉ねぎ", romaji: "tamanegi" },
+  { en: "cucumber", fr: "concombre", es: "pepino", jp: "きゅうり", romaji: "kyūri" },
+  { en: "spinach", fr: "épinard", es: "espinaca", jp: "ほうれん草", romaji: "hōrensō" },
+  { en: "lettuce", fr: "laitue", es: "lechuga", jp: "レタス", romaji: "retasu" },
+  { en: "broccoli", fr: "brocoli", es: "brócoli", jp: "ブロッコリー", romaji: "burokkorī" },
+  { en: "pepper", fr: "poivron", es: "pimiento", jp: "ピーマン", romaji: "pīman" },
+  { en: "garlic", fr: "ail", es: "ajo", jp: "にんにく", romaji: "ninniku" },
+  { en: "ginger", fr: "gingembre", es: "jengibre", jp: "生姜", romaji: "shōga" },
+  { en: "chili", fr: "piment", es: "chile", jp: "唐辛子", romaji: "tōgarashi" },
+  { en: "watermelon", fr: "pastèque", es: "sandía", jp: "スイカ", romaji: "suika" },
+  { en: "kiwi", fr: "kiwi", es: "kiwi", jp: "キウイ", romaji: "kiui" },
+  { en: "mango", fr: "mangue", es: "mango", jp: "マンゴー", romaji: "mangō" },
+  { en: "avocado", fr: "avocat", es: "aguacate", jp: "アボカド", romaji: "abokado" },
+  { en: "pear", fr: "poire", es: "pera", jp: "梨", romaji: "nashi" },
+  { en: "fig", fr: "figue", es: "higo", jp: "イチジク", romaji: "ichijiku" },
+  { en: "apricot", fr: "abricot", es: "albaricoque", jp: "アプリコット", romaji: "apurikotto" },
+  { en: "sun", fr: "soleil", es: "sol", jp: "太陽", romaji: "taiyō" },
+  { en: "moon", fr: "lune", es: "luna", jp: "月", romaji: "tsuki" },
+  { en: "star", fr: "étoile", es: "estrella", jp: "星", romaji: "hoshi" },
+  { en: "cloud", fr: "nuage", es: "nube", jp: "雲", romaji: "kumo" },
+  { en: "rain", fr: "pluie", es: "lluvia", jp: "雨", romaji: "ame" },
+  { en: "snow", fr: "neige", es: "nieve", jp: "雪", romaji: "yuki" },
+  { en: "storm", fr: "tempête", es: "tormenta", jp: "嵐", romaji: "arashi" },
+  { en: "sky", fr: "ciel", es: "cielo", jp: "空", romaji: "sora" },
+  { en: "mountain", fr: "montagne", es: "montaña", jp: "山", romaji: "yama" },
+  { en: "river", fr: "rivière", es: "río", jp: "川", romaji: "kawa" },
+  { en: "lake", fr: "lac", es: "lago", jp: "湖", romaji: "mizuumi" },
+  { en: "ocean", fr: "océan", es: "océano", jp: "海", romaji: "umi" },
+  { en: "desert", fr: "désert", es: "desierto", jp: "砂漠", romaji: "sabaku" },
+  { en: "forest", fr: "forêt", es: "bosque", jp: "森", romaji: "mori" },
+  { en: "flower", fr: "fleur", es: "flor", jp: "花", romaji: "hana" },
+  { en: "grass", fr: "herbe", es: "hierba", jp: "草", romaji: "kusa" },
+  { en: "leaf", fr: "feuille", es: "hoja", jp: "葉", romaji: "ha" },
+  { en: "vine", fr: "vigne", es: "vid", jp: "ブドウのつる", romaji: "budō no tsuru" },
+  { en: "bird", fr: "oiseau", es: "pájaro", jp: "鳥", romaji: "tori" },
+  { en: "fish", fr: "poisson", es: "pez", jp: "魚", romaji: "sakana" },
+  { en: "butterfly", fr: "papillon", es: "mariposa", jp: "蝶", romaji: "chō" },
+  { en: "bee", fr: "abeille", es: "abeja", jp: "蜂", romaji: "hachi" },
+  { en: "ant", fr: "fourmi", es: "hormiga", jp: "蟻", romaji: "ari" },
+  { en: "snake", fr: "serpent", es: "serpiente", jp: "蛇", romaji: "hebi" },
+  { en: "elephant", fr: "éléphant", es: "elefante", jp: "象", romaji: "zō" },
+  { en: "tiger", fr: "tigre", es: "tigre", jp: "虎", romaji: "tora" },
+  { en: "zebra", fr: "zèbre", es: "cebra", jp: "シマウマ", romaji: "shimauma" },
+  { en: "bear", fr: "ours", es: "oso", jp: "熊", romaji: "kuma" },
+  { en: "rabbit", fr: "lapin", es: "conejo", jp: "ウサギ", romaji: "usagi" },
+  { en: "horse", fr: "cheval", es: "caballo", jp: "馬", romaji: "uma" },
+  { en: "cow", fr: "vache", es: "vaca", jp: "牛", romaji: "ushi" },
+  { en: "whale", fr: "baleine", es: "ballena", jp: "クジラ", romaji: "kujira" },
+  { en: "dolphin", fr: "dauphin", es: "delfín", jp: "イルカ", romaji: "iruka" }
+
+];
+
+let sortDirections = [null, null, null, null];
+
+// Génère le tableau HTML
+function generateTable() {
+  const tbody = document.querySelector("#langTable tbody");
+  tbody.innerHTML = "";
+
+  for (const word of words) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${word.en}</td>
+      <td>${word.fr}</td>
+      <td>${word.es}</td>
+      <td>${word.jp} (${word.romaji})</td>
+    `;
+    tbody.appendChild(row);
+  }
+  highlightDuplicates();
+}
+
+function highlightDuplicates() {
+  const tbody = document.querySelector("#langTable tbody");
+  const rows = Array.from(tbody.rows);
+  const seen = new Map();
+  let duplicates = 0;
+
+  // Parcours les lignes du tableau et détecte les doublons
+  rows.forEach(row => {
+    const key = row.cells[0].innerText + row.cells[1].innerText + row.cells[2].innerText + row.cells[3].innerText;
+    if (seen.has(key)) {
+      row.classList.add("duplicate");
+      duplicates++;
+    } else {
+      seen.set(key, true);
+    }
+  });
+
+  // Afficher le nombre de doublons
+  if (duplicates > 0) {
+    document.getElementById("duplicateCount").innerText = `${duplicates} duplicate row${duplicates > 1 ? 's' : ''}`;
+  } else {
+    document.getElementById("duplicateCount").innerText = '';
+  }
+}
+
+function sortTable(columnIndex) {
+  const table = document.getElementById("langTable");
+  const rows = Array.from(table.tBodies[0].rows);
+
+  let ascending = true;
+  if (sortDirections[columnIndex] === true) {
+    ascending = false;
+  }
+
+  rows.sort((rowA, rowB) => {
+    const cellA = rowA.cells[columnIndex].innerText.toLowerCase();
+    const cellB = rowB.cells[columnIndex].innerText.toLowerCase();
+    if (cellA < cellB) return ascending ? -1 : 1;
+    if (cellA > cellB) return ascending ? 1 : -1;
+    return 0;
+  });
+
+  rows.forEach(row => table.tBodies[0].appendChild(row));
+
+  for (let i = 0; i < 4; i++) {
+    document.getElementById(`btn-${i}`).innerText = "None";
+    sortDirections[i] = null;
+  }
+
+  sortDirections[columnIndex] = ascending;
+  document.getElementById(`btn-${columnIndex}`).innerText = ascending ? "Alphabetical" : "Anti-alphabetical";
+}
+
+function filterTable() {
+  const input = document.getElementById("searchBar").value.toLowerCase();
+  const table = document.getElementById("langTable");
+  const rows = table.tBodies[0].rows;
+  let visibleCount = 0;
+
+  for (let row of rows) {
+    for (let cell of row.cells) {
+      cell.innerHTML = cell.innerText;
+    }
+  }
+
+  for (let row of rows) {
+    let text = "";
+    for (let cell of row.cells) {
+      text += cell.innerText.toLowerCase() + " ";
+    }
+
+    if (text.includes(input)) {
+      row.style.display = "";
+      visibleCount++;
+
+      if (input.trim() !== "") {
+        for (let cell of row.cells) {
+          const originalText = cell.innerText;
+          const regex = new RegExp(`(${input})`, 'gi');
+          const highlightedText = originalText.replace(regex, `<mark>$1</mark>`);
+          cell.innerHTML = highlightedText;
+        }
+      }
+    } else {
+      row.style.display = "none";
+    }
+  }
+
+  document.getElementById("resultCount").innerText = `${visibleCount} ${visibleCount === 1 ? 'result' : 'results'}`;
+}
+
+function sortDefault() {
+  sortDirections = [null, null, null, null];
+  sortTable(0);
+}
+
+window.onload = function() {
+  generateTable();
+  sortDefault();
+  filterTable();
+};
+</script>
+
+</body>
+</html>
