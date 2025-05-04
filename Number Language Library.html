@@ -2,43 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Multilingual Numbers Table</title>
+    <title>Multilingual Numbers Table with Binary</title>
     <style>
         table {
             border-collapse: collapse;
-            width: 60%;
+            width: 95%;
             margin: 50px auto;
+            font-family: Arial, sans-serif;
         }
         th, td {
             border: 1px solid #333;
-            padding: 10px;
+            padding: 8px;
             text-align: center;
         }
         th {
-            background-color: #f4f4f4;
+            background-color: #eaeaea;
         }
     </style>
 </head>
 <body>
     <table>
         <tr>
+            <th>Binary</th>
             <th>Number</th>
             <th>English</th>
             <th>French</th>
             <th>Spanish</th>
             <th>Japanese</th>
         </tr>
-        <tr><td>0</td><td>Zero</td><td>Zéro</td><td>Cero</td><td>零 (Rei)</td></tr>
-        <tr><td>1</td><td>One</td><td>Un</td><td>Uno</td><td>一 (Ichi)</td></tr>
-        <tr><td>2</td><td>Two</td><td>Deux</td><td>Dos</td><td>二 (Ni)</td></tr>
-        <tr><td>3</td><td>Three</td><td>Trois</td><td>Tres</td><td>三 (San)</td></tr>
-        <tr><td>4</td><td>Four</td><td>Quatre</td><td>Cuatro</td><td>四 (Shi/Yon)</td></tr>
-        <tr><td>5</td><td>Five</td><td>Cinq</td><td>Cinco</td><td>五 (Go)</td></tr>
-        <tr><td>6</td><td>Six</td><td>Six</td><td>Seis</td><td>六 (Roku)</td></tr>
-        <tr><td>7</td><td>Seven</td><td>Sept</td><td>Siete</td><td>七 (Shichi/Nana)</td></tr>
-        <tr><td>8</td><td>Eight</td><td>Huit</td><td>Ocho</td><td>八 (Hachi)</td></tr>
-        <tr><td>9</td><td>Nine</td><td>Neuf</td><td>Nueve</td><td>九 (Kyuu/Ku)</td></tr>
-        <tr><td>10</td><td>Ten</td><td>Dix</td><td>Diez</td><td>十 (Juu)</td></tr>
+        <tr><td>0000</td><td>0</td><td>Zero</td><td>Zéro</td><td>Cero</td><td>零 (Rei)</td></tr>
+		<tr><td>≈ 0.0001100110</td><td>0.1</td><td>Zero point one</td><td>Zéro virgule un</td><td>Cero coma uno</td><td>零・一 (Rei-ten-ichi)</td></tr>
+		<tr><td>≈ 0.0011001100</td><td>0.2</td><td>Zero point two</td><td>Zéro virgule deux</td><td>Cero coma dos</td><td>零・二 (Rei-ten-ni)</td></tr>
+		<tr><td>≈ 0.0100110011</td><td>0.3</td><td>Zero point three</td><td>Zéro virgule trois</td><td>Cero coma tres</td><td>零・三 (Rei-ten-san)</td></tr>
+		<tr><td>≈ 0.0110011001</td><td>0.4</td><td>Zero point four</td><td>Zéro virgule quatre</td><td>Cero coma cuatro</td><td>零・四 (Rei-ten-yon)</td></tr>
+		<tr><td>0.1</td><td>0.5</td><td>Zero point five</td><td>Zéro virgule cinq</td><td>Cero coma cinco</td><td>零・五 (Rei-ten-go)</td></tr>
+		<tr><td>≈ 0.1001100110</td><td>0.6</td><td>Zero point six</td><td>Zéro virgule six</td><td>Cero coma seis</td><td>零・六 (Rei-ten-roku)</td></tr>
+		<tr><td>≈ 0.1011001100</td><td>0.7</td><td>Zero point seven</td><td>Zéro virgule sept</td><td>Cero coma siete</td><td>零・七 (Rei-ten-nana)</td></tr>
+		<tr><td>≈ 0.1100110011</td><td>0.8</td><td>Zero point eight</td><td>Zéro virgule huit</td><td>Cero coma ocho</td><td>零・八 (Rei-ten-hachi)</td></tr>
+		<tr><td>≈ 0.1110011001</td><td>0.9</td><td>Zero point nine</td><td>Zéro virgule neuf</td><td>Cero coma nueve</td><td>零・九 (Rei-ten-kyuu)</td></tr>
+        <tr><td>1</td><td>1</td><td>One</td><td>Un</td><td>Uno</td><td>一 (Ichi)</td></tr>
+        <tr><td>10</td><td>2</td><td>Two</td><td>Deux</td><td>Dos</td><td>二 (Ni)</td></tr>
+        <tr><td>11</td><td>3</td><td>Three</td><td>Trois</td><td>Tres</td><td>三 (San)</td></tr>
+        <tr><td>100</td><td>4</td><td>Four</td><td>Quatre</td><td>Cuatro</td><td>四 (Shi/Yon)</td></tr>
+        <tr><td>101</td><td>5</td><td>Five</td><td>Cinq</td><td>Cinco</td><td>五 (Go)</td></tr>
+        <tr><td>110</td><td>6</td><td>Six</td><td>Six</td><td>Seis</td><td>六 (Roku)</td></tr>
+        <tr><td>111</td><td>7</td><td>Seven</td><td>Sept</td><td>Siete</td><td>七 (Shichi/Nana)</td></tr>
+        <tr><td>1000</td><td>8</td><td>Eight</td><td>Huit</td><td>Ocho</td><td>八 (Hachi)</td></tr>
+        <tr><td>1001</td><td>9</td><td>Nine</td><td>Neuf</td><td>Nueve</td><td>九 (Kyuu/Ku)</td></tr>
+        <tr><td>1010</td><td>10</td><td>Ten</td><td>Dix</td><td>Diez</td><td>十 (Juu)</td></tr>
+        <tr><td>1011</td><td>11</td><td>Eleven</td><td>Onze</td><td>Once</td><td>十一 (Juuichi)</td></tr>
+        <tr><td>1100</td><td>12</td><td>Twelve</td><td>Douze</td><td>Doce</td><td>十二 (Juunii)</td></tr>
+        <tr><td>1101</td><td>13</td><td>Thirteen</td><td>Treize</td><td>Trece</td><td>十三 (Juusan)</td></tr>
+        <tr><td>1110</td><td>14</td><td>Fourteen</td><td>Quatorze</td><td>Catorce</td><td>十四 (Juuyon)</td></tr>
+        <tr><td>1111</td><td>15</td><td>Fifteen</td><td>Quinze</td><td>Quince</td><td>十五 (Juugo)</td></tr>
+        <tr><td>10000</td><td>16</td><td>Sixteen</td><td>Seize</td><td>Dieciséis</td><td>十六 (Juuroku)</td></tr>
+        <tr><td>10001</td><td>17</td><td>Seventeen</td><td>Dix-sept</td><td>Diecisiete</td><td>十七 (Juunana)</td></tr>
+        <tr><td>10010</td><td>18</td><td>Eighteen</td><td>Dix-huit</td><td>Dieciocho</td><td>十八 (Juuhachi)</td></tr>
+        <tr><td>10011</td><td>19</td><td>Nineteen</td><td>Dix-neuf</td><td>Diecinueve</td><td>十九 (Juukyuu)</td></tr>
+        <tr><td>10100</td><td>20</td><td>Twenty</td><td>Vingt</td><td>Veinte</td><td>二十 (Nijuu)</td></tr>
+        <tr><td>11110</td><td>30</td><td>Thirty</td><td>Trente</td><td>Treinta</td><td>三十 (Sanjuu)</td></tr>
+        <tr><td>101000</td><td>40</td><td>Forty</td><td>Quarante</td><td>Cuarenta</td><td>四十 (Yonjuu)</td></tr>
+        <tr><td>110010</td><td>50</td><td>Fifty</td><td>Cinquante</td><td>Cincuenta</td><td>五十 (Gojuu)</td></tr>
+        <tr><td>111100</td><td>60</td><td>Sixty</td><td>Soixante</td><td>Sesenta</td><td>六十 (Rokujuu)</td></tr>
+        <tr><td>1000110</td><td>70</td><td>Seventy</td><td>Soixante-dix</td><td>Setenta</td><td>七十 (Nanajuu)</td></tr>
+        <tr><td>1010000</td><td>80</td><td>Eighty</td><td>Quatre-vingts</td><td>Ochenta</td><td>八十 (Hachijuu)</td></tr>
+        <tr><td>1011010</td><td>90</td><td>Ninety</td><td>Quatre-vingt-dix</td><td>Noventa</td><td>九十 (Kyujuu)</td></tr>
+        <tr><td>1100100</td><td>100</td><td>One Hundred</td><td>Cent</td><td>Cien</td><td>百 (Hyaku)</td></tr>
+		<tr><td>11001000</td><td>200</td><td>Two Hundred</td><td>Deux cents</td><td>Doscientos</td><td>二百 (Nihyaku)</td></tr>
+		<tr><td>100101100</td><td>300</td><td>Three Hundred</td><td>Trois cents</td><td>Trescientos</td><td>三百 (Sanbyaku)</td></tr>
+		<tr><td>110010000</td><td>400</td><td>Four Hundred</td><td>Quatre cents</td><td>Cuatrocientos</td><td>四百 (Yonhyaku)</td></tr>
+		<tr><td>111110100</td><td>500</td><td>Five Hundred</td><td>Cinq cents</td><td>Quinientos</td><td>五百 (Gohyaku)</td></tr>
+		<tr><td>1001011000</td><td>600</td><td>Six Hundred</td><td>Six cents</td><td>Seiscientos</td><td>六百 (Roppyaku)</td></tr>
+		<tr><td>1010111100</td><td>700</td><td>Seven Hundred</td><td>Sept cents</td><td>Setecientos</td><td>七百 (Nanahyaku)</td></tr>
+		<tr><td>1100100000</td><td>800</td><td>Eight Hundred</td><td>Huit cents</td><td>Ochocientos</td><td>八百 (Happyaku)</td></tr>
+		<tr><td>1110000100</td><td>900</td><td>Nine Hundred</td><td>Neuf cents</td><td>Novecientos</td><td>九百 (Kyuuhyaku)</td></tr>
+        <tr><td>1111101000</td><td>1 000</td><td>One Thousand</td><td>Mille</td><td>Mil</td><td>千 (Sen)</td></tr>
+		<tr><td>10011100010000</td><td>10 000</td><td>Ten Thousand</td><td>Dix mille</td><td>Diez mil</td><td>一万 (Ichiman)</td></tr>
+		<tr><td>11000011010100000</td><td>100 000</td><td>One Hundred Thousand</td><td>Cent mille</td><td>Cien mil</td><td>十万 (Juu-man)</td></tr>
+		<tr><td>11110100001001000000</td><td>1 000 000</td><td>One Million</td><td>Un million</td><td>Un millón</td><td>百万 (Hyakuman)</td></tr>
+		<tr><td>100110001001011010000000</td><td>10 000 000</td><td>Ten Million</td><td>Dix millions</td><td>Diez millones</td><td>千万 (Sen-man)</td></tr>
+		<tr><td>101111101011110000100000000</td><td>100 000 000</td><td>One Hundred Million</td><td>Cent millions</td><td>Cien millones</td><td>一億 (Ichi-oku)</td></tr>
+		<tr><td>111011100110101100101000000000</td><td>1 000 000 000</td><td>One Billion</td><td>Un milliard</td><td>Mil millones</td><td>十億 (Juu-oku)</td></tr>
     </table>
 </body>
 </html>
