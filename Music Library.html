@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Music Player</title>
+  <style>
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px; border: 1px solid #ddd; }
+    input { padding: 5px; margin-bottom: 10px; width: 300px; }
+    select { margin-left: 10px; padding: 5px; }
+    audio { width: 100%; }
+  </style>
+</head>
+<body>
+
+  <h1>Music Library</h1>
+  <input type="text" id="search" placeholder="Search...">
+  <span id="count"></span>
+  <select id="sort">
+    <option value="alpha">A → Z</option>
+    <option value="alpha-rev">Z → A</option>
+    <option value="short">Shortest → Longest</option>
+    <option value="long">Longest → Shortest</option>
+  </select>
+
+  <table id="musicTable">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Player</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let musics = [], filtered = [];
+
+    async function fetchData() {
+      const res = await fetch('music.json');
+      musics = await res.json();
+      musics.sort((a, b) => a.name.localeCompare(b.name));
+      filtered = musics;
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector("#musicTable tbody");
+      tbody.innerHTML = "";
+      filtered.forEach(music => {
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = music.name;
+
+        const playerCell = document.createElement("td");
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.preload = "none";
+        audio.src = music.file;
+        playerCell.appendChild(audio);
+
+        row.appendChild(nameCell);
+        row.appendChild(playerCell);
+        tbody.appendChild(row);
+      });
+
+      const count = filtered.length;
+      document.getElementById("count").textContent = `${count} audio${count === 1 ? '' : 's'} found`;
+    }
+
+    document.getElementById("search").addEventListener("input", e => {
+      const val = e.target.value.toLowerCase();
+      filtered = musics.filter(m => m.name.toLowerCase().includes(val));
+      renderTable();
+    });
+
+    document.getElementById("sort").addEventListener("change", e => {
+      const val = e.target.value;
+      if (val === "alpha") {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (val === "alpha-rev") {
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (val === "short") {
+        filtered.sort((a, b) => a.duration - b.duration);
+      } else if (val === "long") {
+        filtered.sort((a, b) => b.duration - a.duration);
+      }
+      renderTable();
+    });
+
+    fetchData();
+  </script>
+
+</body>
+</html>
